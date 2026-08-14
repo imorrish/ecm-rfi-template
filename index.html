@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECM RFI Template</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;80HT&display=swap" rel="stylesheet">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white py-8 px-6 shadow-lg">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold tracking-tight">ECM RFI Template</h1>
+            <p class="mt-2 text-slate-400">Microsoft 365 Document Management Solution Request for Information</p>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-4xl mx-auto w-full p-6" id="content-area">
+        
+        <!-- Navigation / Category Selector -->
+        <nav class="mb-8 flex flex-wrap gap-3" hx-boost="true">
+            <button class="nav-btn active" hx-get="components/functional.html" hx-target="#content-area" hx-swap="innerHTML">
+                Functional Requirements
+            </button>
+            <button class="nav-btn" hx-get="components/non-functional.html" hx-target="#content-area" hx-swap="innerHTML">
+                Non-Functional Requirements
+            </button>
+            <button class="nav-btn" hx-get="components/vendor.html" hx-target="#content-area" hx-swap="innerHTML">
+                Vendor Capability & Experience
+            </button>
+        </nav>
+
+        <!-- Initial Content (Functional) -->
+        <section id="main-container" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <!-- This area will be populated by HTMX from components/ -->
+            <div class="p-8 text-center text-slate	e">
+                <p class="text-slate-500 italic">Select a category above to begin reviewing RFI questions.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm">
+        <div class="max-w-4xl mx-auto px-6">
+            &copy; 2026 ECM RFI Template • Built with HTMX & Tailwind
+        </div>
+    </footer>
+
+</body>
+</html>
