@@ -7,15 +7,108 @@
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;80HT&display=swap" rel="stylesheet">
-    <!-- HTMX -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="string">
+    <!-- HTMX and Tailwind CSS -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <!-- Tailwind CSS for rapid styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles/main.css">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+
+    <!-- Persistence & Export Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            /**
+             * Restores checkbox states from localStorage to the DOM.
+             * This is called on initial load and after HTMX content swaps.
+             */
+            const restoreCheckboxes = () => {
+                const savedStates = JSON.parse(localStorage.getItem('rfi-selections') || '{}');
+                Object.entries(savedStates).forEach(([id, isChecked]) => {
+                    const cb = document.getElementById(id);
+                    if (cb) cb.checked = isChecked;
+                });
+            };
+
+            /**
+             * Listens for any checkbox changes within the page to persist state.
+             * Uses event delegation on the body to handle dynamically loaded HTMX content.
+             */
+            document.body.addEventListener('change', (event) => {
+                if (event.target.name === 'rfi-selection') {
+                    const savedStates = JSON.parse(localStorage.getItem('rfi-selections') || '{}');
+                    savedStates[event.target.id] = event.target.checked;
+                    localStorage.setItem('rfi-selections', JSON.stringify(savedStates));
+                }
+            }, true);
+
+            /**
+             * HTMX Lifecycle Hook: Re-apply checkboxes after new content is swapped in.
+             */
+            document.body.addEventListener('htmx:afterSwap', (event) => {
+                restoreCheckboxes();
+            });
+
+            /**
+             * Export selected items to a downloadable CSV file.
+             * Scans the current DOM for elements that match our saved IDs and are currently checked.
+             */
+            const exportCSV = () => {
+                const savedStates = JSON.parse(localStorage.getItem('rfi-selections') || '{}');
+                const selectedIds = Object.keys(savedStates).filter(id => savedStates[id]);
+                
+                if (selectedIds.length === 0) {
+                    alert("No items selected for export!");
+                    return;
+                }
+
+                // Header for the CSV file
+                const rows = [["ID", "Question", "Description"].join(",")];
+
+                let foundCount = 0;
+                selectedIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    // We only export what is currently visible in the DOM (the active tab)
+                    if (el && el.checked) {
+                        const container = el.closest('.rfi-card');
+                        if (container) {
+                            const questionEl = container.querySelector('.rfi-question');
+                            const descEl = container.querySelector('.rfi-description');
+                            
+                            if (questionEl && descEl) {
+                                const question = `"${questionEl.innerText.trim().replace(/"/g, '""')}"`;
+                                const description = `"${descEl.innerText.trim().replace(/"/g, '""')}"`;
+                                rows.push(`${id},${question},${description}`);
+                                foundCount++;
+                            }
+                        }
+                    }
+                });
+
+                if (foundCount === 0) {
+                    alert("No selected items were found in the current view. Please switch to the relevant category tab before exporting.");
+                    return;
+                }
+
+                const csvContent = rows.join("\n");
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `RFI_Export_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            // Attach event listener to the Export button
+            const exportBtn = document.getElementById('export-btn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', exportCSV);
+            }
+
+            // Initial Bootstrap
+            restoreCheckboxes();
+        });
+    </script>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
@@ -43,20 +136,23 @@
             </button>
         </nav>
 
-        <!-- Initial Content (Functional) -->
+        <!-- Initial Content Container -->
         <section id="main-container" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <!-- This area will be populated by HTMX from components/ -->
-            <div class="p-8 text-center text-slate	e">
-                <p class="text-slate-500 italic">Select a category above to begin reviewing RFI questions.</p>
+            <!-- Initially loaded via HTMX or direct content -->
+            <div class="p-8 text-center text-slate-500 italic">
+                Select a category above to begin reviewing RFI questions.
             </div>
         </section>
-
     </main>
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm">
-        <div class="max-w-4xl mx-auto px-6">
-            &copy; 2026 ECM RFI Template • Built with HTMX & Tailwind
+        <div class="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>&copy; 2026 ECM RFI Template • Built with HTMX & Tailwind</div>
+            <button id="export-btn" class="inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-lg font-semibold text-xs hover:bg-slate-800 transition-colors shadow-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export Selected as CSV
+            </button>
         </div>
     </footer>
 
