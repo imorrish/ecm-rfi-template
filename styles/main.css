@@ -1,25 +1,32 @@
 /* styles/main.css */
 
+/* styles/main.css */
+
+/* Corporate Identity: Deep Blue (Slate-900), Professional accents, and high legibility */
+
 .nav-btn {
-    @apply px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:scale-95;
+    @apply px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-200 
+           border border-slate-300 bg-white text-slate-700 shadow-sm 
+           hover:shadow-md hover:bg-slate-50 hover:text-slate-900 active:scale-95;
 }
 
 .nav-btn.active {
-    @apply bg-slate-900 text-white border-slate-900 shadow-md;
+    @apply bg-slate-900 text-white border-slate-900 shadow-lg ring-2 ring-slate-900 ring-offset-2;
 }
 
 .rfi-card {
-    @apply p-6 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors duration-150;
+    @apply p-6 border-b border-slate-200 last:border-0 hover:bg-blue-50/30 transition-colors duration-150;
 }
 
 .rfi-question {
-    @apply text-lg font-semibold text-slate-80	e mb-2;
+    @apply text-lg font-bold text-slate-800 mb-2;
 }
 
 .rfi-description {
-    @apply text-sm text-slate-500 leading-relaxed;
+    @apply text-sm text-slate-600 leading-relaxed;
 }
 
 .category-header {
-    @apply bg-slate-100 px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200;
+    @apply bg-slate-100 px-6 py-3 text-xs font-bold uppercase tracking-wider 
+           text-slate-600 border-b border-slate-200;
 }
