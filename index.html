@@ -120,10 +120,10 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow max-w-4xl mx-auto w-full p-6" id="content-area">
+    <!-- Main Container (Wraps everything to provide layout/padding) -->
+    <div class="max-w-4xl mx-auto w-full p-6 flex flex-col min-h-[calc(100vh-250px)]">
         
-        <!-- Navigation / Category Selector -->
+        <!-- Navigation / Category Selector (Permanent - not part of target) -->
         <nav class="mb-8 flex flex-wrap gap-3" hx-boost="true">
             <button class="nav-btn active" hx-get="components/functional.html" hx-target="#content-area" hx-swap="innerHTML">
                 Functional Requirements
@@ -136,14 +136,14 @@
             </button>
         </nav>
 
-        <!-- Initial Content Container -->
-        <section id="main-container" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <!-- Initially loaded via HTMX or direct content -->
+        <!-- Content Area (Target of HTMX swaps) -->
+        <section id="content-area" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-grow">
+            <!-- This area will be populated by HTMX from components/ -->
             <div class="p-8 text-center text-slate-500 italic">
                 Select a category above to begin reviewing RFI questions.
             </div>
         </section>
-    </main>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm">
