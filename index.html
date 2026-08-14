@@ -105,6 +105,23 @@
                 exportBtn.addEventListener('click', exportCSV);
             }
 
+            // Clear functionality
+            const clearBtn = document.getElementById('clear-btn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    if (confirm("Are you sure you want to clear all selections? This cannot be undone.")) {
+                        localStorage.removeItem('rfi-selections');
+                        // Refresh the current view to reflect cleared checkboxes
+                        const activeTab = document.querySelector('nav button.active');
+                        if (activeTab) {
+                            htmx.ajax('GET', activeTab.getAttribute('hx-get'), '#content-area');
+                        } else {
+                            restoreCheckboxes();
+                        }
+                    }
+                });
+            }
+
             // Initial Bootstrap
             restoreCheckboxes();
         });
@@ -149,10 +166,16 @@
     <footer class="bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm">
         <div class="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>&copy; 2026 ECM RFI Template • Built with HTMX & Tailwind</div>
-            <button id="export-btn" class="inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-lg font-semibold text-xs hover:bg-slate-800 transition-colors shadow-sm">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Export Selected as CSV
-            </button>
+            <div class="flex items-center gap-3">
+                <button id="clear-btn" class="inline-flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg font-semibold text-xs hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.169 21H7.831a2 2 0 01-1.994-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Clear All
+                </button>
+                <button id="export-btn" class="inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-lg font-semibold text-xs hover:bg-slate-800 transition-colors shadow-sm">
+                    <svg class="w-4 h 4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export Selected as CSV
+                </button>
+            </div>
         </div>
     </footer>
 
