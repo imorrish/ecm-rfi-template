@@ -1,103 +1,77 @@
 /* styles/main.css */
 
-/* Modern SaaS Identity: Soft Shadows, High Depth, and Refined Typography */
+/* Modern "React-like" Application Aesthetic */
+/* Focus: High-depth layers, Segmented Controls, and Micro-interactions */
 
-/* Page Background & Base */
-body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900;
+  }
 }
 
-/* Navigation: Segmented Control Style */
-.nav-btn {
-    @apply px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 
-           border border-transparent bg-transparent text-slate-600 
-           hover:bg-white hover:text-slate-900 hover:shadow-sm active:scale-95;
-}
+@layer components {
+  /* THE SEGMENTED CONTROL: The core of modern app navigation */
+  .segmented-control {
+    @apply inline-flex items-center p-1 bg-slate-200/60 backdrop-blur-md rounded-xl border border-slate-200/50 shadow-inner;
+  }
 
-.nav-btn.active {
-    @apply bg-white text-slate-900 border-slate-200 shadow-sm ring-1 ring-slate-200;
-}
+  .nav-btn {
+    @apply relative px-5 py-2 text-sm font-semibold transition-all duration-200 ease-out
+           text-slate-600 rounded-lg active:scale-95;
+  }
 
-/* The "Surfaced" Card: The heart of the modern look */
-.rfi-card {
-    @apply bg-white p-6 rounded-xl border border-slate-200 shadow-sm 
-           hover:shadow-md hover:border-blue-200 transition-all duration-200 mb-4;
-}
+  .nav-btn.active {
+    @apply bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/50;
+  }
 
-.rfi-question {
+  /* THE SURFACED CARD: deep, soft, and interactive */
+  .rfi-card {
+    @apply bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm 
+           hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 
+           transition-all duration-300 ease-in-out mb-4;
+  }
+
+  .rfi-question {
     @apply text-lg font-bold text-slate-800 mb-1.5 tracking-tight;
-}
+  }
 
-.rfi-description {
+  .rfi-description {
     @apply text-sm text-slate-500 leading-relaxed;
+  }
+
+  /* LOADING STATE: used via htmx:beforeRequest */
+  .htmx-swapping {
+    @apply opacity-50 scale-[0.98] blur-[1px] transition-all duration-200;
+  }
 }
 
-/* Category Header / Ribbon */
-.category-header {
-    @apply bg-slate-100/50 px-6 py-2.5 text-xs font-bold uppercase tracking-widest 
-           text-slate-500 border-y border-slate-200;
+/* Custom Keyframes for component "mounting" animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Footer Styling */
-footer {
-    @apply bg-white border-t border-slate-200 py-8;
+.animate-mount {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Custom Scrollbar for a premium feel */
+/* Smooth Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
+  width: 6px;
 }
-
 ::-webkit-scrollbar-track {
-    @apply bg-slate-100;
+  @apply bg-transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-0                           
-           hover:shadow-md hover:bg-slate-50 hover:text-slate-900 active:scale-95;
-}
-
-.nav-btn.active {
-    @apply bg-slate-900 text-white border-slate-900 shadow-lg ring-2 ring-slate-900 ring-offset-2;
-}
-
-.rfi-card {
-    @apply p-6 border-b border-slate-200 last:border-0 hover:bg-blue-50/30 transition-colors duration-150;
-}
-
-.rfi-question {
-    @apply text-lg font-bold text-slate-800 mb-2;
-}
-
-.rfi-description {
-    @apply text-sm text-slate-600 leading-relaxed;
-}
-
-.category-header {
-    @apply bg-slate-100 px-6 py-3 text-xs font-bold uppercase tracking-wider 
-           text-slate-600 border-b border-slate-200;
+  @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
 }
