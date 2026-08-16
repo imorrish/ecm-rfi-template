@@ -7,7 +7,7 @@
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="string">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <!-- HTMX and Tailwind CSS -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +18,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             /**
              * Restores checkbox states from localStorage to the DOM.
-             * This is called on initial load and after HTMX content swaps.
              */
             const restoreCheckboxes = () => {
                 const savedStates = JSON.parse(localStorage.getItem('rfi-selections') || '{}');
@@ -29,14 +28,45 @@
             };
 
             /**
+             * Updates the count indicators in the navigation buttons.
+             * Scans all checkboxes on the page and updates the (n) text.
+             */
+            const updateCountIndicators = () => {
+                const savedStates = JSON.parse(localStorage.getItem('rfi-selections') || '{}');
+                const buttons = Array.from(document.querySelectorAll('.nav-btn'));
+                
+                buttons.forEach(btn => {
+                    const targetUrl = btn.getAttribute('hx-get');
+                    let count = 0;
+                    const prefixMap = {
+                        'components/functional.html': 'f-',
+                        'components/non-functional.html': 'nf-',
+                        'components/vendor.html': 'v-'
+                    };
+                    
+                    const prefix = prefixMap[targetUrl];
+                    if (prefix) {
+                        Object.entries(savedStates).forEach(([id, isChecked]) => {
+                            if (isChecked && id.startsWith(prefix)) {
+                                count++;
+                            }
+                        });
+                    }
+
+                    const textContent = btn.innerText.split('(')[0].trim();
+                    btn.innerHTML = `${textContent} <span class="ml-2 text-xs font-normal opacity-70">(${count})</span>`;
+                });
+            };
+
+            /**
              * Listens for any checkbox changes within the page to persist state.
-             * Uses event delegation on the body to handle dynamically loaded HTMX content.
              */
             document.body.addEventListener('change', (event) => {
                 if (event.target.name === 'rfi-selection') {
                     const savedStates = JSON.parse(localStorage.getItem('rfi-selections') || '{}');
                     savedStates[event.target.id] = event.target.checked;
                     localStorage.setItem('rfi-selections', JSON.stringify(savedStates));
+                    updateCountIndicators();
                 }
             }, true);
 
@@ -45,11 +75,11 @@
              */
             document.body.addEventListener('htmx:afterSwap', (event) => {
                 restoreCheckboxes();
+                updateCountIndicators();
             });
 
             /**
              * Export selected items to a downloadable CSV file.
-             * Scans the current DOM for elements that match our saved IDs and are currently checked.
              */
             const exportCSV = () => {
                 const savedStates = JSON.parse(localStorage.getItem('rfi-selections') || '{}');
@@ -60,19 +90,15 @@
                     return;
                 }
 
-                // Header for the CSV file
                 const rows = [["ID", "Question", "Description"].join(",")];
-
                 let foundCount = 0;
                 selectedIds.forEach(id => {
                     const el = document.getElementById(id);
-                    // We only export what is currently visible in the DOM (the active tab)
                     if (el && el.checked) {
                         const container = el.closest('.rfi-card');
                         if (container) {
                             const questionEl = container.querySelector('.rfi-question');
                             const descEl = container.querySelector('.rfi-description');
-                            
                             if (questionEl && descEl) {
                                 const question = `"${questionEl.innerText.trim().replace(/"/g, '""')}"`;
                                 const description = `"${descEl.innerText.trim().replace(/"/g, '""')}"`;
@@ -99,24 +125,20 @@
                 document.body.removeChild(link);
             };
 
-            // Attach event listener to the Export button
             const exportBtn = document.getElementById('export-btn');
-            if (exportBtn) {
-                exportBtn.addEventListener('click', exportCSV);
-            }
+            if (exportBtn) exportBtn.addEventListener('click', exportCSV);
 
-            // Clear functionality
             const clearBtn = document.getElementById('clear-btn');
             if (clearBtn) {
                 clearBtn.addEventListener('click', () => {
                     if (confirm("Are you sure you want to clear all selections? This cannot be undone.")) {
                         localStorage.removeItem('rfi-selections');
-                        // Refresh the current view to reflect cleared checkboxes
                         const activeTab = document.querySelector('nav button.active');
                         if (activeTab) {
                             htmx.ajax('GET', activeTab.getAttribute('hx-get'), '#content-area');
                         } else {
                             restoreCheckboxes();
+                            updateCountIndicators();
                         }
                     }
                 });
@@ -124,12 +146,12 @@
 
             // Initial Bootstrap
             restoreCheckboxes();
+            updateCountIndicators();
         });
     </script>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-90int min-h-screen flex flex-col">
 
-    <!-- Header -->
     <header class="bg-slate-900 text-white py-8 px-6 shadow-lg">
         <div class="max-w-4xl mx-auto">
             <h1 class="text-3xl font-bold tracking-tight">ECM RFI Template</h1>
@@ -137,10 +159,8 @@
         </div>
     </header>
 
-    <!-- Main Container (Wraps everything to provide layout/padding) -->
     <div class="max-w-4xl mx-auto w-full p-6 flex flex-col min-h-[calc(100vh-250px)]">
         
-        <!-- Navigation / Category Selector (Permanent - not part of target) -->
         <nav class="mb-8 flex flex-wrap gap-3" hx-boost="true">
             <button class="nav-btn active" hx-get="components/functional.html" hx-target="#content-area" hx-swap="innerHTML">
                 Functional Requirements
@@ -153,26 +173,23 @@
             </button>
         </nav>
 
-        <!-- Content Area (Target of HTMX swaps) -->
         <section id="content-area" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-grow">
-            <!-- This area will be populated by HTMX from components/ -->
             <div class="p-8 text-center text-slate-500 italic">
                 Select a category above to begin reviewing RFI questions.
             </div>
         </section>
     </div>
 
-    <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm">
         <div class="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>&copy; 2026 ECM RFI Template • Built with HTMX & Tailwind</div>
             <div class="flex items-center gap-3">
                 <button id="clear-btn" class="inline-flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg font-semibold text-xs hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.169 21H7.831a2 2 0 01-1.994-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <svg class="w-4 h-<u>4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.169 21H7.831a2 2 0 01-1.994-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     Clear All
                 </button>
                 <button id="export-btn" class="inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-lg font-semibold text-xs hover:bg-slate-800 transition-colors shadow-sm">
-                    <svg class="w-4 h 4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     Export Selected as CSV
                 </button>
             </div>
